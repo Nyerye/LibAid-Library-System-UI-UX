@@ -122,5 +122,39 @@ extern "C" {
     __declspec(dllexport) void PrintBooks() {
         printBooks(&ht);
     }
+    __declspec(dllexport) User* SearchUserByLastName(const char* lastName) {
+        int hash = generateUserHash(lastName);
+        return searchUserByHash(&ht, hash);
+    }
+
+    __declspec(dllexport) Book* SearchBookByTitle(const char* title) {
+        int hash = generateBookHash(title);
+        return searchBookByHash(&ht, hash);
+    }
+    __declspec(dllexport) void RemoveUser(const char* lastName) {
+        pushSnapshot(&ht, undoStack);
+        
+    }
+
+    __declspec(dllexport) void RemoveBook(const char* title) {
+        pushSnapshot(&ht, undoStack);
+        
+    }
+
+    __declspec(dllexport) void UpdateUser(const char* lastName, const char* newFirstName, const char* newLastName) {
+        pushSnapshot(&ht, undoStack);
+        
+    }
+
+    __declspec(dllexport) void UpdateBook(const char* title, const char* newTitle, const char* newAuthor) {
+        pushSnapshot(&ht, undoStack);
+        
+    }
+    __declspec(dllexport) void PrintLogs() {
+        printLogs(); 
+    }
+
+
+
 
 }

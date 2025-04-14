@@ -8,6 +8,8 @@
             <Button Content="Add User" Click="AddUser_Click" Margin="5"/>
             <Button Content="Add Book" Click="AddBook_Click" Margin="5"/>
             <Button Content="View Database" Click="ViewDatabase_Click" Margin="5"/>
+            <Button Content="Borrow / Return" Click="BorrowReturn_Click" Margin="5"/>
+
 
 
 

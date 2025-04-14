@@ -55,6 +55,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BorrowReturnWindow.xaml.cs">
+      <DependentUpon>BorrowReturnWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewDatabaseWindow.xaml.cs">
       <DependentUpon>ViewDatabaseWindow.xaml</DependentUpon>
     </Compile>
@@ -63,6 +66,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="AddUserWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="BorrowReturnWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -25,6 +25,13 @@ namespace LibAid_Frontend
             win.ShowDialog();
         }
 
+        private void BorrowReturn_Click(object sender, RoutedEventArgs e)
+        {
+            var win = new BorrowReturnWindow();
+            win.ShowDialog();
+        }
+
+
 
     }
 }

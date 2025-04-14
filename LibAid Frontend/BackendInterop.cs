@@ -16,5 +16,11 @@ namespace LibAidFrontend
         [DllImport("LibAidBackend.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void AddBook(string title, string author);
 
+        [DllImport("LibAidBackend.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void borrowBook([MarshalAs(UnmanagedType.LPStr)] string title, int userId);
+
+        [DllImport("LibAidBackend.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void returnBook([MarshalAs(UnmanagedType.LPStr)] string title);
+
     }
 }
