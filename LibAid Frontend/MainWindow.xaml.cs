@@ -14,6 +14,11 @@ namespace LibAid_Frontend
             var win = new AddUserWindow();
             win.ShowDialog();
         }
+        private void AddBook_Click(object sender, RoutedEventArgs e)
+        {
+            var win = new AddBookWindow();
+            win.ShowDialog();
+        }
 
     }
 }

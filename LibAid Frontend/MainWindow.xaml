@@ -6,6 +6,8 @@
     <Grid>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
             <Button Content="Add User" Click="AddUser_Click" Margin="5"/>
+            <Button Content="Add Book" Click="AddBook_Click" Margin="5"/>
+
 
         </StackPanel>
     </Grid>

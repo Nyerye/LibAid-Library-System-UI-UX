@@ -12,5 +12,9 @@ namespace LibAidFrontend
 
         [DllImport("LibAidBackend.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void CleanupSystem();
+
+        [DllImport("LibAidBackend.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void AddBook(string title, string author);
+
     }
 }
