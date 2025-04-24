@@ -31,7 +31,7 @@ namespace LibAid_Frontend
 
             try
             {
-                BackendInterop.borrowBook(title, userId);
+                BackendInterop.BorrowBook(title, userId);
                 StatusText.Text = $"'{title}' successfully borrowed by User #{userId}.";
             }
             catch (Exception ex)
@@ -52,7 +52,7 @@ namespace LibAid_Frontend
 
             try
             {
-                BackendInterop.returnBook(title);
+                BackendInterop.ReturnBook(title);
                 StatusText.Text = $"'{title}' successfully returned.";
             }
             catch (Exception ex)

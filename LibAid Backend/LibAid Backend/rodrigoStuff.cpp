@@ -343,110 +343,87 @@ void updateUser(HashTable* ht) {
 // PARAMETERS : Pointer to the hash table 
 // RETURNS    : none
 //
-void borrowBook(HashTable* ht) {
+void borrowBook(HashTable* ht, const char* lastName, const char* bookTitle) {
     char log_message[MAX_LOG_LEN];
-    char lastName[MAX_NAME_LEN];
-    char bookTitle[MAX_TITLE_LEN];
 
-    printf("Enter the last name of the user who wants to borrow: ");
-    fgets(lastName, sizeof(lastName), stdin);
-    lastName[strcspn(lastName, "\n")] = '\0';
-
-    printf("Enter the title of the book to borrow: ");
-    fgets(bookTitle, sizeof(bookTitle), stdin);
-    bookTitle[strcspn(bookTitle, "\n")] = '\0';
-
-    //Look up user and book
     int userHash = generateUserHash(lastName);
     User* user = searchUserByHash(ht, userHash);
-    if (!user) {
-        printf("User '%s' not found\n", lastName);
+    if (!user || user->isDeleted) {
+        printf("User '%s' not found or deleted.\n", lastName);
         return;
     }
 
     int bookHash = generateBookHash(bookTitle);
     Book* book = searchBookByHash(ht, bookHash);
-    if (!book) {
-        printf("Book '%s' not found\n", bookTitle);
+    if (!book || book->isDeleted) {
+        printf("Book '%s' not found or deleted.\n", bookTitle);
         return;
     }
 
-    //If it's borrowed, queue the user. Otherwise, assign borrowedBy
-    if (book->borrowedBy) {
-        printf("Book is currently borrowed; user '%s %s' added to the waiting queue\n", user->firstName, user->lastName);
+    if (book->isBorrowed) {
         enqueueUser(book, user);
-
-        //Logging
-        snprintf(log_message, sizeof(log_message), "Book is currently borrowed; user '%s %s' added to the waiting queue", user->firstName, user->lastName);
-        logAction("Borrow Book", log_message);
+        snprintf(log_message, sizeof(log_message), "Book is borrowed; user '%s %s' queued", user->firstName, user->lastName);
     }
     else {
-        book->borrowedBy = user;
-        printf("Book '%s' is now borrowed by '%s %s'\n", book->title, user->firstName, user->lastName);
-
-        //Logging
-        snprintf(log_message, sizeof(log_message), "Book '%s' is now borrowed by '%s %s'", book->title, user->firstName, user->lastName);
-        logAction("Borrow Book", log_message);
+        book->isBorrowed = true;
+        book->borrowedById = user->userId;
+        snprintf(log_message, sizeof(log_message), "Book '%s' borrowed by '%s %s'", book->title, user->firstName, user->lastName);
     }
 
-    //Update the book in the file | Pichara implementing...
+    printf("%s\n", log_message);
+    logAction("Borrow Book", log_message);
     syncDatabaseToFile(ht, "database.txt");
 }
 
-
-//
-// FUNCTION   : borrowBook
-// DESCRIPTION: Called from checkOutMenu option 2
-// PARAMETERS : Pointer to the hash table 
-// RETURNS    : none
-//
-void returnBook(HashTable* ht) {
+void returnBook(HashTable* ht, const char* bookTitle) {
     char log_message[MAX_LOG_LEN];
-    char bookTitle[MAX_TITLE_LEN];
-
-    printf("Enter the title of the book to return: ");
-    fgets(bookTitle, sizeof(bookTitle), stdin);
-    bookTitle[strcspn(bookTitle, "\n")] = '\0';
-
     int bookHash = generateBookHash(bookTitle);
     Book* book = searchBookByHash(ht, bookHash);
-    if (!book) {
-        printf("Book '%s' not found.\n", bookTitle);
+    if (!book || book->isDeleted) {
+        printf("Book not found or deleted.\n");
         return;
     }
 
-    //If it was borrowed, free it up. Then see if the queue has anyone waiting
-    if (book->borrowedBy) {
-        printf("Book '%s' returned by '%s %s'\n",
+    if (!book->isBorrowed) {
+        printf("Book is not currently borrowed.\n");
+        return;
+    }
+
+    // Log previous borrower (optional)
+    int prevUserId = book->borrowedById;
+    User* prevUser = searchUserByHash(ht, prevUserId);
+
+    book->isBorrowed = false;
+    book->borrowedById = -1;
+
+    // Try to dequeue next user
+    User* nextUser = dequeueUser(book);
+    if (nextUser) {
+        book->isBorrowed = true;
+        book->borrowedById = nextUser->userId;
+        snprintf(log_message, sizeof(log_message),
+            "Book '%s' returned by '%s %s', now borrowed by '%s %s'",
             book->title,
-            book->borrowedBy->firstName,
-            book->borrowedBy->lastName);
-
-        //Logging
-        snprintf(log_message, sizeof(log_message), "Book %s, returned by %s %s", book->title, book->borrowedBy->firstName, book->borrowedBy->lastName);
-        logAction("Book Return", log_message);
-
-        book->borrowedBy = NULL;
-
-        //Dequeue the next waiting user, if any
-        User* nextUser = dequeueUser(book);
-        if (nextUser) {
-            //Immediately assign the book to the next user in queue
-            book->borrowedBy = nextUser;
-            printf("Book '%s' is now automatically borrowed by '%s %s'", book->title, nextUser->firstName, nextUser->lastName);
-
-            //Logging
-            snprintf(log_message, sizeof(log_message), "Book %s, returned by %s %s and automatically borrowed by '%s %s", book->title, book->borrowedBy->firstName, book->borrowedBy->lastName, nextUser->firstName, nextUser->lastName);
-            logAction("Book Return", log_message);
-        }
+            prevUser ? prevUser->firstName : "Unknown",
+            prevUser ? prevUser->lastName : "",
+            nextUser->firstName, nextUser->lastName);
     }
     else {
-        printf("That book was not borrowed\n");
+        snprintf(log_message, sizeof(log_message),
+            "Book '%s' returned by '%s %s'",
+            book->title,
+            prevUser ? prevUser->firstName : "Unknown",
+            prevUser ? prevUser->lastName : "");
     }
 
-	//Update the file
+    printf("%s\n", log_message);
+    logAction("Return Book", log_message);
     syncDatabaseToFile(ht, "database.txt");
 }
+
+
+
+
 
 
 //
@@ -456,30 +433,53 @@ void returnBook(HashTable* ht) {
 // RETURNS    : none
 //
 void processBookMenu(HashTable* ht, SnapshotStack* undoStack) {
-	checkOutOptions choice;
+    checkOutOptions choice;
+    char userLastName[MAX_NAME_LEN];
+    char bookTitle[MAX_TITLE_LEN];
+
     do {
-    printf("\nPlease choose an option:\n");
-    printf("1. Borrow a book\n");
-    printf("2. Return a book\n");
-    printf("3. Back\n");
-    printf("Enter your choice: ");
-    choice = (checkOutOptions)GetValidIntegerInput();
-    switch (choice) {
-    case BORROW_BOOK:
-		pushSnapshot(ht, undoStack);
-        borrowBook(ht);
-        break;
-    case RETURN_BOOK:
-		pushSnapshot(ht, undoStack);
-        returnBook(ht);
-        break;
-    case BACK_PROCESS:
-        break;
-    default:
-        printf("Invalid choice!\n");
-    }
-	} while (choice != BACK_PROCESS);
+        printf("\nPlease choose an option:\n");
+        printf("1. Borrow a book\n");
+        printf("2. Return a book\n");
+        printf("3. Back\n");
+        printf("Enter your choice: ");
+        choice = (checkOutOptions)GetValidIntegerInput();
+
+        switch (choice) {
+        case BORROW_BOOK:
+            pushSnapshot(ht, undoStack);
+
+            printf("Enter the last name of the user who wants to borrow: ");
+            fgets(userLastName, sizeof(userLastName), stdin);
+            userLastName[strcspn(userLastName, "\n")] = '\0';
+
+            printf("Enter the title of the book to borrow: ");
+            fgets(bookTitle, sizeof(bookTitle), stdin);
+            bookTitle[strcspn(bookTitle, "\n")] = '\0';
+
+            borrowBook(ht, userLastName, bookTitle);
+            break;
+
+        case RETURN_BOOK:
+            pushSnapshot(ht, undoStack);
+
+            printf("Enter the title of the book to return: ");
+            fgets(bookTitle, sizeof(bookTitle), stdin);
+            bookTitle[strcspn(bookTitle, "\n")] = '\0';
+
+            returnBook(ht, bookTitle);
+            break;
+
+        case BACK_PROCESS:
+            break;
+
+        default:
+            printf("Invalid choice!\n");
+        }
+
+    } while (choice != BACK_PROCESS);
 }
+
 
 //
 // FUNCTION   : enqueueUser
@@ -597,20 +597,25 @@ int compareUsersById(User* u1, User* u2) {
 // RETURNS    : -1 if b1 comes before b2, 0 if they are the same, 1 if b1 comes after b2
 //
 int compareBooksByIndex(Book* b1, Book* b2) {
-	//Checking if the book is borrowed or not
-    if (b1->borrowedBy == NULL && b2->borrowedBy != NULL) {
+    // Compare based on borrowed status
+    if (!b1->isBorrowed && b2->isBorrowed) {
         return -1;
     }
-    if (b1->borrowedBy != NULL && b2->borrowedBy == NULL) {
+    if (b1->isBorrowed && !b2->isBorrowed) {
         return 1;
     }
 
-    //If both are either available or borrowed, compare hashCode
-	//Negative if b1 comes before b2,
-    //Zero if both are the same
-    //Positive if b1 comes after b2
-    return b1->hashCode - b2->hashCode;
+    // If both are borrowed or both are available, compare by hashCode
+    if (b1->hashCode < b2->hashCode) {
+        return -1;
+    }
+    if (b1->hashCode > b2->hashCode) {
+        return 1;
+    }
+
+    return 0;
 }
+
 
 
 //
@@ -727,15 +732,18 @@ void inOrderPrintBooks(BookBSTNode* root) {
 
     inOrderPrintBooks(root->left);
 
-    //Print info
-    printf("BookID: %d | Title: %s | Author: %s | %s\n",
-        root->data->hashCode,
-        root->data->title,
-        root->data->author,
-        (root->data->borrowedBy ? "Borrowed" : "Available"));
+    // Skip deleted books
+    if (!root->data->isDeleted) {
+        printf("BookID: %d | Title: %s | Author: %s | %s\n",
+            root->data->hashCode,
+            root->data->title,
+            root->data->author,
+            root->data->isBorrowed ? "Borrowed" : "Available");
+    }
 
     inOrderPrintBooks(root->right);
 }
+
 
 //
 // FUNCTION   : freeBookBST   
@@ -813,67 +821,60 @@ void printBooks(HashTable* ht) {
 //
 void loadDatabase(HashTable* ht, const char* filename) {
     FILE* file = NULL;
-	errno_t err = fopen_s(&file, filename, "a+"); //a+ creates the file if it doesn't exist
+    errno_t err = fopen_s(&file, filename, "a+"); // Creates file if not exists
     if (err != 0 || !file) {
         printf("Error opening %s for reading...\n", filename);
         return;
     }
 
     fseek(file, 0, SEEK_SET);
-    char line[256];
+    char line[512];
 
-	//Read each line and parse it, check if a its a book or user to write to the hash table
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\n")] = '\0';
-           
-        //USER line format: USER,<userId>,<firstName>,<lastName>
+
         if (strncmp(line, "USER,", 5) == 0) {
-            int userId;
-			char firstName[50] = { 0 };
-			char lastName[50] = { 0 };
+            int userId, isDeleted = 0;
+            char firstName[MAX_NAME_LEN] = { 0 };
+            char lastName[MAX_NAME_LEN] = { 0 };
 
-            if (sscanf_s(line + 5, "%d,%49[^,],%49[^\n]", &userId, firstName, (unsigned)_countof(firstName), lastName, (unsigned)_countof(lastName)) == 3)
-            {
+            if (sscanf_s(line + 5, "%d,%49[^,],%49[^,],%d", &userId,
+                firstName, (unsigned)_countof(firstName),
+                lastName, (unsigned)_countof(lastName),
+                &isDeleted) == 4) {
                 User* newUser = (User*)malloc(sizeof(User));
-                if (!newUser) {
-                    printf("Memory allocation error for newUser\n");
-                    continue;
-                }
-                newUser->userId = userId;
-                strcpy_s(newUser->firstName, sizeof(newUser->firstName), firstName);
-                strcpy_s(newUser->lastName, sizeof(newUser->lastName), lastName);
+                if (!newUser) continue;
 
+                newUser->userId = userId;
+                strcpy_s(newUser->firstName, firstName);
+                strcpy_s(newUser->lastName, lastName);
+                newUser->isDeleted = (bool)isDeleted;
                 int index = userId % TABLE_SIZE;
                 newUser->next = ht->users[index];
                 ht->users[index] = newUser;
             }
         }
-
-        //BOOK line format: BOOK,<hashCode>,<title>,<author>,<borrowedFlag>,<borrowedById>
         else if (strncmp(line, "BOOK,", 5) == 0) {
-            int hashCode, borrowedFlag, borrowedById;
-			char title[100] = { 0 };
-			char author[100] = { 0 };
+            int hashCode, isBorrowed = 0, borrowedById = -1, isDeleted = 0;
+            char title[MAX_TITLE_LEN] = { 0 };
+            char author[MAX_AUTHOR_LEN] = { 0 };
 
-            if (sscanf_s(line + 5, "%d,%99[^,],%99[^,],%d,%d", &hashCode, title, (unsigned)_countof(title), author, (unsigned)_countof(author), &borrowedFlag, &borrowedById) == 5)
-            {
+            if (sscanf_s(line + 5, "%d,%99[^,],%99[^,],%d,%d,%d",
+                &hashCode,
+                title, (unsigned)_countof(title),
+                author, (unsigned)_countof(author),
+                &isBorrowed,
+                &borrowedById,
+                &isDeleted) == 6) {
                 Book* newBook = (Book*)malloc(sizeof(Book));
-                if (!newBook) {
-                    printf("Memory allocation error for newBook\n");
-                    continue;
-                }
+                if (!newBook) continue;
+
                 newBook->hashCode = hashCode;
-                strcpy_s(newBook->title, sizeof(newBook->title), title);
-                strcpy_s(newBook->author, sizeof(newBook->author), author);
-
-                if (borrowedFlag == 1) {
-                    User* foundUser = searchUserByHash(ht, borrowedById);
-                    newBook->borrowedBy = foundUser;
-                }
-                else {
-                    newBook->borrowedBy = NULL;
-                }
-
+                strcpy_s(newBook->title, title);
+                strcpy_s(newBook->author, author);
+                newBook->isBorrowed = (bool)isBorrowed;
+                newBook->borrowedById = borrowedById;
+                newBook->isDeleted = (bool)isDeleted;
                 newBook->queueFront = NULL;
                 newBook->queueRear = NULL;
 
@@ -887,6 +888,7 @@ void loadDatabase(HashTable* ht, const char* filename) {
     fclose(file);
     printf("Database loaded from %s\n", filename);
 }
+
 
 
 //
@@ -903,33 +905,21 @@ void syncDatabaseToFile(HashTable* ht, const char* filename) {
         return;
     }
 
-	//Write users
     for (int i = 0; i < TABLE_SIZE; i++) {
         User* u = ht->users[i];
         while (u) {
-            fprintf(file, "USER,%d,%s,%s\n", u->userId, u->firstName, u->lastName);
+            fprintf(file, "USER,%d,%s,%s,%d\n",
+                u->userId, u->firstName, u->lastName, u->isDeleted);
             u = u->next;
         }
     }
 
-	//Write books
     for (int i = 0; i < TABLE_SIZE; i++) {
         Book* b = ht->table[i];
         while (b) {
-            int borrowedFlag;
-            int borrowedById;
-
-            if (b->borrowedBy != NULL) {
-                borrowedFlag = 1;
-                borrowedById = b->borrowedBy->userId;
-            }
-            else {
-                borrowedFlag = 0;
-                borrowedById = -1;
-            }
-
-            fprintf(file, "BOOK,%d,%s,%s,%d,%d\n", b->hashCode, b->title, b->author, borrowedFlag, borrowedById);
-
+            fprintf(file, "BOOK,%d,%s,%s,%d,%d,%d\n",
+                b->hashCode, b->title, b->author,
+                b->isBorrowed, b->borrowedById, b->isDeleted);
             b = b->next;
         }
     }

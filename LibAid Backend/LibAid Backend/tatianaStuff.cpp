@@ -101,68 +101,67 @@ HashTable* copyHashTable(HashTable* original) {
 
     HashTable* newHT = (HashTable*)malloc(sizeof(HashTable));
     if (!newHT) {
-        printf("Memory allocation failed!.\n");
+        printf("Memory allocation failed!\n");
         return NULL;
     }
+
     initHashTable(newHT);
-	//Copy users
+
+    // Copy users
     for (int i = 0; i < TABLE_SIZE; i++) {
         User* cur = original->users[i];
         User** tailPtr = &newHT->users[i];
+
         while (cur) {
             User* newUser = (User*)malloc(sizeof(User));
             if (!newUser) {
-                printf("Memory allocation failed!.\n");
+                printf("Memory allocation failed!\n");
                 return newHT;
             }
-            strcpy_s(newUser->firstName, cur->firstName);
-            strcpy_s(newUser->lastName, cur->lastName);
+
+            strcpy_s(newUser->firstName, sizeof(newUser->firstName), cur->firstName);
+            strcpy_s(newUser->lastName, sizeof(newUser->lastName), cur->lastName);
             newUser->userId = cur->userId;
+            newUser->isDeleted = cur->isDeleted;
             newUser->next = NULL;
 
             *tailPtr = newUser;
             tailPtr = &newUser->next;
-
             cur = cur->next;
         }
     }
 
-	//Copy books
+    // Copy books
     for (int i = 0; i < TABLE_SIZE; i++) {
         Book* cur = original->table[i];
         Book** tailPtr = &newHT->table[i];
+
         while (cur) {
             Book* newBook = (Book*)malloc(sizeof(Book));
             if (!newBook) {
                 printf("Memory allocation failed!\n");
                 return newHT;
             }
+
             newBook->hashCode = cur->hashCode;
-            strcpy_s(newBook->title, cur->title);
-            strcpy_s(newBook->author, cur->author);
-
-            if (cur->borrowedBy) {
-                int userId = cur->borrowedBy->userId;
-                newBook->borrowedBy = searchUserByHash(newHT, userId);
-            }
-            else {
-                newBook->borrowedBy = NULL;
-            }
-
-            newBook->queueFront = NULL; 
+            strcpy_s(newBook->title, sizeof(newBook->title), cur->title);
+            strcpy_s(newBook->author, sizeof(newBook->author), cur->author);
+            newBook->isBorrowed = cur->isBorrowed;
+            newBook->borrowedById = cur->borrowedById;
+            newBook->isDeleted = cur->isDeleted;
+            newBook->queueFront = NULL;
             newBook->queueRear = NULL;
             newBook->next = NULL;
 
-            // Inserir
             *tailPtr = newBook;
             tailPtr = &newBook->next;
-
             cur = cur->next;
         }
     }
 
     return newHT;
 }
+
 
 // FUNCTION   : overwriteHashTable
 // DESCRIPTION: Overwrites the contents of a HashTable with the contents of another HashTable
@@ -172,67 +171,61 @@ void overwriteHashTable(HashTable* destinationHT, HashTable* sourceHT) {
     if (!destinationHT || !sourceHT) return;
 
     freeHashTable(destinationHT);
+    initHashTable(destinationHT); // clears everything
 
-    for (int i = 0; i < TABLE_SIZE; i++) {
-        destinationHT->users[i] = NULL;
-        destinationHT->table[i] = NULL;
-    }
-
-	//Copy users
+    // Copy users
     for (int i = 0; i < TABLE_SIZE; i++) {
         User* cur = sourceHT->users[i];
         User** tailPtr = &destinationHT->users[i];
+
         while (cur) {
             User* newUser = (User*)malloc(sizeof(User));
             if (!newUser) {
                 printf("Memory allocation failed!\n");
                 return;
             }
-            strcpy_s(newUser->firstName, cur->firstName);
-            strcpy_s(newUser->lastName, cur->lastName);
+
+            strcpy_s(newUser->firstName, sizeof(newUser->firstName), cur->firstName);
+            strcpy_s(newUser->lastName, sizeof(newUser->lastName), cur->lastName);
             newUser->userId = cur->userId;
+            newUser->isDeleted = cur->isDeleted;
             newUser->next = NULL;
 
             *tailPtr = newUser;
             tailPtr = &newUser->next;
-
             cur = cur->next;
         }
     }
 
-	//Copy books
+    // Copy books
     for (int i = 0; i < TABLE_SIZE; i++) {
         Book* cur = sourceHT->table[i];
         Book** tailPtr = &destinationHT->table[i];
-    
+
         while (cur) {
             Book* newBook = (Book*)malloc(sizeof(Book));
             if (!newBook) {
                 printf("Memory allocation failed!\n");
                 return;
             }
-            newBook->hashCode = cur->hashCode;
-            strcpy_s(newBook->title, cur->title);
-            strcpy_s(newBook->author, cur->author);
 
-            if (cur->borrowedBy) {
-                int userId = cur->borrowedBy->userId;
-                newBook->borrowedBy = searchUserByHash(destinationHT, userId);
-            }
-            else {
-                newBook->borrowedBy = NULL;
-            }
+            newBook->hashCode = cur->hashCode;
+            strcpy_s(newBook->title, sizeof(newBook->title), cur->title);
+            strcpy_s(newBook->author, sizeof(newBook->author), cur->author);
+            newBook->isBorrowed = cur->isBorrowed;
+            newBook->borrowedById = cur->borrowedById;
+            newBook->isDeleted = cur->isDeleted;
             newBook->queueFront = NULL;
             newBook->queueRear = NULL;
             newBook->next = NULL;
 
             *tailPtr = newBook;
             tailPtr = &newBook->next;
-
             cur = cur->next;
         }
     }
 }
+
 
 
 // FUNCTION   : undo_last_action

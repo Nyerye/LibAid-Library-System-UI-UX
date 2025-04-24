@@ -69,11 +69,13 @@ typedef enum {
 //============================== Structs ==============================\\
 
 typedef struct User {
-    char firstName[50];
-    char lastName[50];
     int userId;
+    char firstName[MAX_NAME_LEN];
+    char lastName[MAX_NAME_LEN];
+    bool isDeleted;
     struct User* next;
 } User;
+
 
 typedef struct BookQueueNode {
     User* user;
@@ -82,13 +84,16 @@ typedef struct BookQueueNode {
 
 typedef struct Book {
     int hashCode;
-    char title[100];
-    char author[100];
-    struct User* borrowedBy;
+    char title[MAX_TITLE_LEN];
+    char author[MAX_AUTHOR_LEN];
+    int borrowedById;           
+    bool isBorrowed;            
+    bool isDeleted;             
     BookQueueNode* queueFront;
     BookQueueNode* queueRear;
     struct Book* next;
 } Book;
+
 
 typedef struct HashTable {
     Book* table[TABLE_SIZE];
@@ -133,8 +138,8 @@ void updateBook(HashTable* ht);
 void removeUser(HashTable* ht);
 void updateUser(HashTable* ht);
 void processBookMenu(HashTable* ht, SnapshotStack* UndoStack);
-void returnBook(HashTable* ht);
-void borrowBook(HashTable* ht);
+void returnBook(HashTable* ht, const char* bookTitle);
+void borrowBook(HashTable* ht, const char* lastName, const char* bookTitle);
 
 //Stack Functions
 void enqueueUser(Book* book, User* user);

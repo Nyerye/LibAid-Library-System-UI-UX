@@ -24,15 +24,6 @@
     <ClInclude Include="mainHeader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="nickStuff.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rodrigoStuff.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tatianaStuff.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
