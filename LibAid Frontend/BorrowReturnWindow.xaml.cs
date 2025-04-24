@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Windows;
 using LibAidFrontend;
 
@@ -10,29 +9,36 @@ namespace LibAid_Frontend
         public BorrowReturnWindow()
         {
             InitializeComponent();
+            LastNameBox.Focus();
         }
 
         private void Borrow_Click(object sender, RoutedEventArgs e)
         {
             string title = TitleBox.Text.Trim();
-            string userIdText = UserIdBox.Text.Trim();
+            string lastName = LastNameBox.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(userIdText))
+            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(lastName))
             {
-                StatusText.Text = "Please provide both title and user ID.";
-                return;
-            }
-
-            if (!int.TryParse(userIdText, out int userId))
-            {
-                StatusText.Text = "User ID must be a number.";
+                StatusText.Text = "Please provide both book title and user last name.";
                 return;
             }
 
             try
             {
-                BackendInterop.BorrowBook(title, userId);
-                StatusText.Text = $"'{title}' successfully borrowed by User #{userId}.";
+                if (!BackendInterop.UserExists(lastName))
+                {
+                    StatusText.Text = $"User with last name '{lastName}' does not exist.";
+                    return;
+                }
+
+                if (!BackendInterop.BookExists(title))
+                {
+                    StatusText.Text = $"Book '{title}' does not exist.";
+                    return;
+                }
+
+                BackendInterop.BorrowBook(lastName, title);
+                StatusText.Text = $"'{title}' successfully borrowed by {lastName}.";
             }
             catch (Exception ex)
             {
@@ -52,6 +58,12 @@ namespace LibAid_Frontend
 
             try
             {
+                if (!BackendInterop.BookExists(title))
+                {
+                    StatusText.Text = $"Book '{title}' does not exist.";
+                    return;
+                }
+
                 BackendInterop.ReturnBook(title);
                 StatusText.Text = $"'{title}' successfully returned.";
             }

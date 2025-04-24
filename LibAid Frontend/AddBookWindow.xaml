@@ -1,14 +1,34 @@
 ﻿<Window x:Class="LibAid_Frontend.AddBookWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Add Book" Height="220" Width="300">
-    <StackPanel Margin="20">
-        <TextBlock Text="Title" />
-        <TextBox x:Name="TitleBox" Margin="0 0 0 10"/>
+        Title="Add Book" Height="240" Width="350"
+        ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
 
-        <TextBlock Text="Author" />
-        <TextBox x:Name="AuthorBox" Margin="0 0 0 10"/>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Title Label -->
+            <RowDefinition Height="Auto"/>
+            <!-- Title Input -->
+            <RowDefinition Height="Auto"/>
+            <!-- Author Label -->
+            <RowDefinition Height="Auto"/>
+            <!-- Author Input -->
+            <RowDefinition Height="Auto"/>
+            <!-- Button -->
+        </Grid.RowDefinitions>
 
-        <Button Content="Add Book" Click="AddBook_Click"/>
-    </StackPanel>
+        <TextBlock Text="Title:" Grid.Row="0" Margin="0,0,0,5"/>
+        <TextBox x:Name="TitleBox" Grid.Row="1" Height="30" Margin="0,0,0,15"/>
+
+        <TextBlock Text="Author:" Grid.Row="2" Margin="0,0,0,5"/>
+        <TextBox x:Name="AuthorBox" Grid.Row="3" Height="30" Margin="0,0,0,15"/>
+
+        <Button Content="Add Book"
+                Grid.Row="4"
+                Height="35"
+                Width="100"
+                HorizontalAlignment="Center"
+                Click="AddBook_Click"/>
+    </Grid>
 </Window>

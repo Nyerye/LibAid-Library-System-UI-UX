@@ -1,7 +1,12 @@
 ﻿<Window x:Class="LibAid_Frontend.ViewDatabaseWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="View Database" Height="450" Width="600">
+        Title="LibAid - View Database"
+        Height="450"
+        Width="600"
+        ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen">
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -9,12 +14,23 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 0 0 10">
-            <Button Content="View Users" Click="ViewUsers_Click" Width="100" Margin="5"/>
-            <Button Content="View Books" Click="ViewBooks_Click" Width="100" Margin="5"/>
+            <Button Content="View Users" Click="ViewUsers_Click" Width="120" Height="35" Margin="10"/>
+            <Button Content="View Books" Click="ViewBooks_Click" Width="120" Height="35" Margin="10"/>
         </StackPanel>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <TextBox x:Name="OutputBox" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" FontFamily="Consolas"/>
+            <TextBox x:Name="OutputBox"
+                     IsReadOnly="True"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     FontFamily="Consolas"
+                     FontSize="14"
+                     Padding="10"
+                     VerticalScrollBarVisibility="Auto"
+                     MinHeight="300"
+                     BorderThickness="1"
+                     BorderBrush="#DDD"
+                     Background="#FAFAFA"/>
         </ScrollViewer>
     </Grid>
 </Window>

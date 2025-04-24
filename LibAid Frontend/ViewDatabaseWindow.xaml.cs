@@ -10,6 +10,7 @@ namespace LibAid_Frontend
         {
             InitializeComponent();
         }
+
         private void ViewBooks_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -23,15 +24,20 @@ namespace LibAid_Frontend
                     {
                         string[] parts = line.Split(',');
 
-                        if (parts.Length >= 6)
+                        if (parts.Length >= 7)
                         {
                             string title = parts[2];
                             string author = parts[3];
-                            string borrowedBy = parts[4];
+                            bool isBorrowed = parts[4] == "1";
+                            string borrowedBy = parts[5];
+                            bool isDeleted = parts[6] == "1";
 
-                            string status = (borrowedBy == "0" || borrowedBy == "-1")
-                                ? "Available"
-                                : $"Borrowed by User {borrowedBy}";
+                            if (isDeleted)
+                                continue; // Skip soft-deleted books
+
+                            string status = isBorrowed
+                                ? $"Borrowed by User {borrowedBy}"
+                                : "Available";
 
                             OutputBox.AppendText($"📖 {title} by {author} — {status}\n");
                         }
@@ -61,11 +67,15 @@ namespace LibAid_Frontend
                     {
                         string[] parts = line.Split(',');
 
-                        if (parts.Length >= 4)
+                        if (parts.Length >= 5)
                         {
                             string id = parts[1];
                             string first = parts[2];
                             string last = parts[3];
+                            bool isDeleted = parts[4] == "1";
+
+                            if (isDeleted)
+                                continue; // Skip soft-deleted users
 
                             OutputBox.AppendText($"🧑 User #{id} — {first} {last}\n");
                         }
@@ -81,6 +91,5 @@ namespace LibAid_Frontend
                 MessageBox.Show("Error reading users: " + ex.Message);
             }
         }
-
     }
 }

@@ -9,6 +9,7 @@ namespace LibAid_Frontend
         public AddBookWindow()
         {
             InitializeComponent();
+            TitleBox.Focus(); // Auto-focus on title input
         }
 
         private void AddBook_Click(object sender, RoutedEventArgs e)
@@ -18,19 +19,25 @@ namespace LibAid_Frontend
 
             if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(author))
             {
-                MessageBox.Show("Please enter both the title and author.");
+                MessageBox.Show("Please enter both the title and author.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             try
             {
+                if (BackendInterop.BookExists(title))
+                {
+                    MessageBox.Show($"A book with the title '{title}' already exists.", "Duplicate Book", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
                 BackendInterop.AddBook(title, author);
-                MessageBox.Show($"Book '{title}' by '{author}' added.");
+                MessageBox.Show($"Book '{title}' by '{author}' added successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}");
+                MessageBox.Show($"Error while adding book:\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
