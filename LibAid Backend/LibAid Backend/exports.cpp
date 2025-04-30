@@ -220,6 +220,60 @@ extern "C" {
         syncDatabaseToFile(&ht, "database.txt");
     }
 
+    __declspec(dllexport) void HardDeleteUser(const char* lastName) {
+        int hash = generateUserHash(lastName);
+        int index = hash % TABLE_SIZE;
+
+        User* current = ht.users[index];
+        User* prev = nullptr;
+
+        while (current) {
+            if (current->userId == hash && strcmp(current->lastName, lastName) == 0) {
+                if (prev == nullptr)
+                    ht.users[index] = current->next;
+                else
+                    prev->next = current->next;
+
+                char logMsg[MAX_LOG_LEN];
+                snprintf(logMsg, sizeof(logMsg), "User %s hard-deleted via GUI", lastName);
+                logAction("Hard Delete User", logMsg);
+                free(current);
+
+                syncDatabaseToFile(&ht, "database.txt");
+                return;
+            }
+            prev = current;
+            current = current->next;
+        }
+    }
+    __declspec(dllexport) void HardDeleteBook(const char* title) {
+        int hash = generateBookHash(title);
+        int index = hash % TABLE_SIZE;
+
+        Book* current = ht.table[index];
+        Book* prev = nullptr;
+
+        while (current) {
+            if (strcmp(current->title, title) == 0 && current->hashCode == hash) {
+                if (prev == nullptr)
+                    ht.table[index] = current->next;
+                else
+                    prev->next = current->next;
+
+                char logMsg[MAX_LOG_LEN];
+                snprintf(logMsg, sizeof(logMsg), "Book %s hard-deleted via GUI", title);
+                logAction("Hard Delete Book", logMsg);
+                free(current);
+
+                syncDatabaseToFile(&ht, "database.txt");
+                return;
+            }
+            prev = current;
+            current = current->next;
+        }
+    }
+
+
     __declspec(dllexport) bool UserExists(const char* lastName) {
         int hash = generateUserHash(lastName);
         User* user = searchUserByHash(&ht, hash);

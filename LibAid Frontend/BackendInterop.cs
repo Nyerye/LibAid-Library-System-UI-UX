@@ -50,5 +50,12 @@ namespace LibAidFrontend
 
         [DllImport("LibAidBackend.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void PrintBooks();
+
+        [DllImport("LibAidBackend.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void HardDeleteUser(string lastName);
+
+        [DllImport("LibAidBackend.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void HardDeleteBook(string title);
+
     }
 }
