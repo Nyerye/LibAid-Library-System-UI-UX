@@ -22,7 +22,9 @@ namespace LibAid_Frontend
             try
             {
                 string[] lines = File.ReadAllLines("database.txt");
-                OutputBox.Text = "=== All Books ===\n\n";
+                OutputBox.Text = "Books:\n\n";
+                OutputBox.AppendText("Title                 | Author           | Status\n");
+                OutputBox.AppendText("----------------------|------------------|----------\n");
 
                 foreach (string line in lines)
                 {
@@ -30,26 +32,17 @@ namespace LibAid_Frontend
                     {
                         string[] parts = line.Split(',');
 
-                        if (parts.Length >= 7)
+                        if (parts.Length >= 7 && parts[6] == "0")
                         {
-                            string title = parts[2];
-                            string author = parts[3];
-                            bool isBorrowed = parts[4] == "1";
-                            string borrowedBy = parts[5];
-                            bool isDeleted = parts[6] == "1";
+                            string rawTitle = parts[2];
+                            string rawAuthor = parts[3];
+                            string status = parts[4] == "1" ? "Borrowed" : "Available";
 
-                            if (isDeleted)
-                                continue; // Skip soft-deleted books
+                            string title = (rawTitle.Length > 21 ? rawTitle.Substring(0, 21) + "…" : rawTitle).PadRight(22);
+                            string author = (rawAuthor.Length > 17 ? rawAuthor.Substring(0, 17) + "…" : rawAuthor).PadRight(18);
+                            status = status.PadRight(10);
 
-                            string status = isBorrowed
-                                ? $"Borrowed by User {borrowedBy}"
-                                : "Available";
-
-                            OutputBox.AppendText($"📖 {title} by {author} — {status}\n");
-                        }
-                        else
-                        {
-                            OutputBox.AppendText("⚠️ Error parsing line: " + line + "\n");
+                            OutputBox.AppendText($"{title}|{author}|{status}\n");
                         }
                     }
                 }
@@ -60,12 +53,17 @@ namespace LibAid_Frontend
             }
         }
 
+
+
+
         private void ViewUsers_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 string[] lines = File.ReadAllLines("database.txt");
-                OutputBox.Text = "=== All Users ===\n\n";
+                OutputBox.Text = "Users:\n\n";
+                OutputBox.AppendText("ID    | First Name       | Last Name\n");
+                OutputBox.AppendText("------|------------------|-----------------\n");
 
                 foreach (string line in lines)
                 {
@@ -73,21 +71,13 @@ namespace LibAid_Frontend
                     {
                         string[] parts = line.Split(',');
 
-                        if (parts.Length >= 5)
+                        if (parts.Length >= 5 && parts[4] == "0") // not deleted
                         {
-                            string id = parts[1];
-                            string first = parts[2];
-                            string last = parts[3];
-                            bool isDeleted = parts[4] == "1";
+                            string id = parts[1].PadRight(5);
+                            string first = parts[2].PadRight(16);
+                            string last = parts[3].PadRight(15);
 
-                            if (isDeleted)
-                                continue; // Skip soft-deleted users
-
-                            OutputBox.AppendText($"🧑 User #{id} — {first} {last}\n");
-                        }
-                        else
-                        {
-                            OutputBox.AppendText("⚠️ Error parsing line: " + line + "\n");
+                            OutputBox.AppendText($"{id} | {first} | {last}\n");
                         }
                     }
                 }
@@ -97,6 +87,7 @@ namespace LibAid_Frontend
                 MessageBox.Show("Error reading users: " + ex.Message);
             }
         }
+
         private void OutputBox_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
             Point clickPoint = e.GetPosition(OutputBox);
