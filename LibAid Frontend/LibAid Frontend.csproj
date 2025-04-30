@@ -58,6 +58,12 @@
     <Compile Include="BorrowReturnWindow.xaml.cs">
       <DependentUpon>BorrowReturnWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UpdateBookWindow.xaml.cs">
+      <DependentUpon>UpdateBookWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UpdateUserWindow.xaml.cs">
+      <DependentUpon>UpdateUserWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewDatabaseWindow.xaml.cs">
       <DependentUpon>ViewDatabaseWindow.xaml</DependentUpon>
     </Compile>
@@ -92,6 +98,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="UpdateBookWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UpdateUserWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ViewDatabaseWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
