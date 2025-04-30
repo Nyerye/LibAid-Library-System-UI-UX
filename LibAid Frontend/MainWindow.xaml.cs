@@ -46,6 +46,11 @@ namespace LibAid_Frontend
             }
         }
 
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
 
     }
 }
