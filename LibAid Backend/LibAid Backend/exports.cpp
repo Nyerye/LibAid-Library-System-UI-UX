@@ -226,6 +226,7 @@ extern "C" {
 
         User* current = ht.users[index];
         User* prev = nullptr;
+        pushSnapshot(&ht, undoStack);
 
         while (current) {
             if (current->userId == hash && strcmp(current->lastName, lastName) == 0) {
@@ -252,6 +253,7 @@ extern "C" {
 
         Book* current = ht.table[index];
         Book* prev = nullptr;
+        pushSnapshot(&ht, undoStack);
 
         while (current) {
             if (strcmp(current->title, title) == 0 && current->hashCode == hash) {

@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
+using LibAidFrontend;
 
 namespace LibAid_Frontend
 {
@@ -31,6 +33,18 @@ namespace LibAid_Frontend
             win.ShowDialog();
         }
 
+        private void Undo_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                BackendInterop.UndoLastAction();
+                MessageBox.Show("Last action has been undone.", "Undo", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error performing undo:\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
 
     }
