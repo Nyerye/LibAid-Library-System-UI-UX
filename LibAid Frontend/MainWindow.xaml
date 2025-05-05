@@ -1,45 +1,39 @@
 ﻿<Window x:Class="LibAid_Frontend.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="LibAid - Main Menu"
-        Height="380"
-        Width="400"
-        ResizeMode="NoResize"
+        Title="LibAid - Main Menu" Height="400" Width="500"
+        ResizeMode="CanMinimize"
         WindowStartupLocation="CenterScreen">
 
-    <Grid>
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Button Content="Add User"
-                    Click="AddUser_Click"
-                    Width="200"
-                    Height="40"
-                    Margin="0 5"/>
+    <Grid Background="#f0f0f0" Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-            <Button Content="Add Book"
-                    Click="AddBook_Click"
-                    Width="200"
-                    Height="40"
-                    Margin="0 5"/>
+        <!-- Title Banner -->
+        <TextBlock Text="LibAid Library System"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   Margin="0 10 0 20" />
 
-            <Button Content="View Database"
-                    Click="ViewDatabase_Click"
-                    Width="200"
-                    Height="40"
-                    Margin="0 5"/>
+        <!-- Main Action Buttons -->
+        <UniformGrid Grid.Row="1" Rows="3" Columns="2" Margin="0 0 0 20">
+            <Button Content="Add User" Click="AddUser_Click" Margin="10" Height="50" FontSize="14" />
+            <Button Content="Add Book" Click="AddBook_Click" Margin="10" Height="50" FontSize="14" />
+            <Button Content="View Database" Click="ViewDatabase_Click" Margin="10" Height="50" FontSize="14" />
+            <Button Content="Borrow / Return" Click="BorrowReturn_Click" Margin="10" Height="50" FontSize="14" />
+            <Button Content="Undo Last Action" Click="Undo_Click" Margin="10" Height="50" FontSize="14" />
+            <Button Content="Exit Program" Click="Exit_Click" Margin="10" Height="50" FontSize="14" Background="#d9534f" Foreground="White" />
+        </UniformGrid>
 
-            <Button Content="Undo Last Action"
-                    Click="Undo_Click"
-                    Width="200"
-                    Height="40"
-                    Margin="0 5"/>
-
-            <Button Content="Exit Program"
-                    Click="Exit_Click"
-                    Width="200"
-                    Height="40"
-                    Margin="0 5"
-                    Background="#c0392b"
-                    Foreground="White"/>
-        </StackPanel>
+        <!-- Footer -->
+        <TextBlock Grid.Row="2" Text="Built with SoftForge © 2025"
+                   FontSize="10"
+                   Foreground="Gray"
+                   HorizontalAlignment="Center"
+                   Margin="0 10 0 0" />
     </Grid>
 </Window>
