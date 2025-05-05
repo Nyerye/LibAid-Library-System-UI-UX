@@ -27,12 +27,6 @@ namespace LibAid_Frontend
 
             try
             {
-                if (BackendInterop.UserExists(last))
-                {
-                    MessageBox.Show($"A user with the last name '{last}' already exists.",
-                                    "Duplicate User", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
 
                 BackendInterop.AddUser(first, last);
                 MessageBox.Show($"User '{first} {last}' added successfully.", "Success",
