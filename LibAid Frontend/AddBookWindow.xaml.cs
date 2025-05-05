@@ -19,7 +19,7 @@ namespace LibAid_Frontend
             string author = AuthorBox.Text.Trim();
 
             if (!Regex.IsMatch(title, @"^[A-Za-z0-9 ,.'-]+$") ||
-                !Regex.IsMatch(author, @"^[A-Za-z,.'-]+$"))
+                !Regex.IsMatch(author, @"^[A-Za-z ,.'-]+$"))
             {
                 MessageBox.Show("Title and author must only contain letters, numbers, and basic punctuation.",
                                 "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
