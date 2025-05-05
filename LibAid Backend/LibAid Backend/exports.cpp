@@ -38,6 +38,7 @@ extern "C" {
         strcpy_s(newUser->lastName, MAX_NAME_LEN, lastName);
         newUser->userId = generateUserHash(lastName);
         newUser->isDeleted = false;
+
         int index = newUser->userId % TABLE_SIZE;
 
         newUser->next = ht.users[index];
@@ -48,6 +49,7 @@ extern "C" {
         logAction("Add User", logMsg);
         syncDatabaseToFile(&ht, "database.txt");
     }
+
 
     __declspec(dllexport) void AddBook(const char* title, const char* author) {
         pushSnapshot(&ht, undoStack);
