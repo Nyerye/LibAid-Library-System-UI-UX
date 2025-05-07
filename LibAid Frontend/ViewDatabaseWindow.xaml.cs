@@ -1,4 +1,25 @@
-﻿using System;
+﻿/// <file>
+/// ViewDatabaseWindow.xaml.cs
+/// </file>
+/// <project>
+/// LibAid v3.0.12
+/// </project>
+/// <author>
+/// Nicholas Reilly
+/// </author>
+/// <date>
+/// 2025-03-27
+/// </date>
+/// <description>
+/// Code for the ViewDatabaseWindow.
+/// </description>
+/// <references>
+/// Deitel, P., & Deitel, H. (2017). *C# 6 for Programmers Sixth Edition* 
+/// (Sixth, Ser. Deitel Development Series). Pearson Education.
+/// </references>
+/// 
+
+using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,19 +29,34 @@ using Microsoft.VisualBasic;
 
 namespace LibAid_Frontend
 {
+    /// <summary>
+    /// Class that contains the backend code for the ViewDatabaseWindow.
+    /// Also has the events to toggle between viewing users and books.
+    /// </summary>
     public partial class ViewDatabaseWindow : Window
     {
         private string _selectedLine;
         private string _currentViewType; // "BOOK" or "USER"
 
+        /// <summary>
+        /// Constructor for the ViewDatabaseWindow.
+        /// </summary>
         public ViewDatabaseWindow()
         {
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Event handler for when the user clicks the "View Books" button.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ViewBooks_Click(object sender, RoutedEventArgs e)
         {
+            //Set the view type to BOOK
             _currentViewType = "BOOK";
+            
+            // Load a basic UI grid in the window. Go through the entire hash table and find all the corresponding results. 
             try
             {
                 string[] lines = File.ReadAllLines("database.txt");
@@ -54,9 +90,17 @@ namespace LibAid_Frontend
             }
         }
 
+        /// <summary>
+        /// Event handler for when the user clicks the "View Users" button.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ViewUsers_Click(object sender, RoutedEventArgs e)
         {
+            // Set the view type to USER
             _currentViewType = "USER";
+
+            // Rpeeat the same logic used in the Book section
             try
             {
                 string[] lines = File.ReadAllLines("database.txt");
@@ -85,6 +129,11 @@ namespace LibAid_Frontend
             }
         }
 
+        /// <summary>
+        /// Event handler for when the user right-clicks on the output box.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OutputBox_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
             Point clickPoint = e.GetPosition(OutputBox);
@@ -106,6 +155,11 @@ namespace LibAid_Frontend
             }
         }
 
+        /// <summary>
+        /// Event handler for when the context menu is opened.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OutputBox_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(_selectedLine) || string.IsNullOrWhiteSpace(_currentViewType))
@@ -142,6 +196,9 @@ namespace LibAid_Frontend
             OutputBox.ContextMenu = menu;
         }
 
+        /// <summary>
+        /// Method that handles the update from switching between viewing books and users in the hash table
+        /// </summary>
         private void HandleUpdate()
         {
             if (_currentViewType == "BOOK")
@@ -161,6 +218,9 @@ namespace LibAid_Frontend
             _selectedLine = null;
         }
 
+        /// <summary>
+        /// Method that handles the delete from switching between viewing books and users in the hash table
+        /// </summary>
         private void HandleDelete()
         {
             if (_currentViewType == "BOOK")
@@ -184,6 +244,9 @@ namespace LibAid_Frontend
             _selectedLine = null;
         }
 
+        /// <summary>
+        /// Method that handles the borrowing of a book from the hash table
+        /// </summary>
         private void HandleBorrow()
         {
             string title = ExtractBookTitle(_selectedLine);
@@ -202,6 +265,9 @@ namespace LibAid_Frontend
             }
         }
 
+        /// <summary>
+        /// Method that handles the retuning of a book from the hash table
+        /// </summary>
         private void HandleReturn()
         {
             string title = ExtractBookTitle(_selectedLine);
@@ -217,18 +283,33 @@ namespace LibAid_Frontend
             }
         }
 
+        /// <summary>
+        /// Method that extracts the book title from the selected line in the output box.
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
         private string ExtractBookTitle(string line)
         {
             string[] columns = line.Split('|');
             return columns.Length > 0 ? columns[0].Trim() : "";
         }
 
+        /// <summary>
+        /// Method that extracts the user last name from the selected line in the output box.
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
         private string ExtractUserLastName(string line)
         {
             string[] columns = line.Split('|');
             return columns.Length > 2 ? columns[2].Trim() : "";
         }
 
+        /// <summary>
+        /// Method that prompts the user for input using a dialog box.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
         private string PromptUser(string message)
         {
             return Interaction.InputBox(message, "Input Required", "");

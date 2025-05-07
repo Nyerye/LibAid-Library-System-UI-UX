@@ -1,5 +1,15 @@
+/*
+* FILE		    : exports.cpp
+* PROJECT	    : LibAid v3.0.12
+* PROGRAMMER	: Nicholas Reilly
+* FIRST VERSION	: 2025-03-27
+* DESCRIPTION	: Exports functions for the DLL application.Takes the existing C code and allows it to be wrapped in a C++ DLL.
+* REFERENCING   : Deitel, P., & Deitel, H. (2016). How to Program in C and C++ (8th ed.). Deitel & Associates Inc.
+*/
+
 #include "mainHeader.h"
 
+// Initilaize variables
 static HashTable ht;
 static SnapshotStack* undoStack = nullptr;
 
@@ -15,19 +25,32 @@ Book* findBookByTitle(const char* title) {
     return nullptr;
 }
 
+
 extern "C" {
 
+	// FUNCTION   : InitSystem
+	// DESCRIPTION: Initializes the system by loading the database and setting up the hash table
+	// PARAMETERS : none
+	// RETURNS    : none
     __declspec(dllexport) void InitSystem() {
         initHashTable(&ht);
         undoStack = initSnapshotStack();
         loadDatabase(&ht, "database.txt");
     }
 
+	// FUNCTION   : CleanupSystem
+	// DESCRIPTION: Cleans up the system by freeing the hash table and snapshot stack
+	// PARAMETERS : none
+	// RETURNS    : none
     __declspec(dllexport) void CleanupSystem() {
         freeSnapshotStack(&undoStack);
         freeHashTable(&ht);
     }
 
+	// FUNCTION   : AddUser
+	// DESCRIPTION: Adds a user to the hash table
+	// PARAMETERS : Pointer to the hash table, first name, last name
+	// RETURNS    : none
     __declspec(dllexport) void AddUser(const char* firstName, const char* lastName) {
         pushSnapshot(&ht, undoStack);
 
@@ -50,7 +73,10 @@ extern "C" {
         syncDatabaseToFile(&ht, "database.txt");
     }
 
-
+	// FUNCTION   : AddBook
+	// DESCRIPTION: Adds a book to the hash table
+	// PARAMETERS : Pointer to the hash table, title, author
+	// RETURNS    : none
     __declspec(dllexport) void AddBook(const char* title, const char* author) {
         pushSnapshot(&ht, undoStack);
 
@@ -81,6 +107,10 @@ extern "C" {
         syncDatabaseToFile(&ht, "database.txt");
     }
 
+	// FUNCTION   : BorrowBook
+	// DESCRIPTION: Borrows a book for a user
+	// PARAMETERS : Pointer to the hash table, user's last name, book title
+	// RETURNS    : none
     __declspec(dllexport) void BorrowBook(const char* userLastName, const char* bookTitle) {
         pushSnapshot(&ht, undoStack);
 
@@ -102,6 +132,10 @@ extern "C" {
         syncDatabaseToFile(&ht, "database.txt");
     }
 
+	// FUNCTION   : ReturnBook
+	// DESCRIPTION: Returns a book and updates the queue
+	// PARAMETERS : Pointer to the hash table, book title
+	// RETURNS    : none
     __declspec(dllexport) void ReturnBook(const char* bookTitle) {
         pushSnapshot(&ht, undoStack);
 
@@ -120,6 +154,10 @@ extern "C" {
         syncDatabaseToFile(&ht, "database.txt");
     }
 
+	// FUNCTION   : RemoveUser
+	// DESCRIPTION: Removes a user from the hash table
+	// PARAMETERS : Pointer to the hash table, user's last name
+	// RETURNS    : none
     __declspec(dllexport) void RemoveUser(const char* lastName) {
         pushSnapshot(&ht, undoStack);
 
@@ -135,6 +173,10 @@ extern "C" {
         syncDatabaseToFile(&ht, "database.txt");
     }
 
+	// FUNCTION   : RemoveBook
+	// DESCRIPTION: Removes a book from the hash table
+	// PARAMETERS : Pointer to the hash table, book title
+	// RETURNS    : none
     __declspec(dllexport) void RemoveBook(const char* title) {
         pushSnapshot(&ht, undoStack);
 
@@ -149,6 +191,10 @@ extern "C" {
         syncDatabaseToFile(&ht, "database.txt");
     }
 
+	// FUNCTION   : UpdateUser
+	// DESCRIPTION: Updates a user's information in the hash table
+	// PARAMETERS : Pointer to the hash table, old last name, new first name, new last name
+	// RETURNS    : none
     __declspec(dllexport) void UpdateUser(const char* oldLastName, const char* newFirstName, const char* newLastName) {
         pushSnapshot(&ht, undoStack);
 
@@ -184,6 +230,10 @@ extern "C" {
         syncDatabaseToFile(&ht, "database.txt");
     }
 
+	// FUNCTION   : UpdateBook
+	// DESCRIPTION: Updates a book's information in the hash table
+	// PARAMETERS : Pointer to the hash table, old title, new title, new author
+	// RETURNS    : none
     __declspec(dllexport) void UpdateBook(const char* oldTitle, const char* newTitle, const char* newAuthor) {
         pushSnapshot(&ht, undoStack);
 
@@ -222,6 +272,10 @@ extern "C" {
         syncDatabaseToFile(&ht, "database.txt");
     }
 
+	// FUNCTION   : HardDeleteUser
+	// DESCRIPTION: Permanently deletes a user from the hash table
+	// PARAMETERS : Pointer to the hash table, user's last name
+	// RETURNS    : none
     __declspec(dllexport) void HardDeleteUser(const char* lastName) {
         int hash = generateUserHash(lastName);
         int index = hash % TABLE_SIZE;
@@ -249,6 +303,11 @@ extern "C" {
             current = current->next;
         }
     }
+
+	// FUNCTION   : HardDeleteBook
+	// DESCRIPTION: Permanently deletes a book from the hash table
+	// PARAMETERS : Pointer to the hash table, book title
+	// RETURNS    : none
     __declspec(dllexport) void HardDeleteBook(const char* title) {
         int hash = generateBookHash(title);
         int index = hash % TABLE_SIZE;
@@ -277,26 +336,45 @@ extern "C" {
         }
     }
 
-
+	// FUNCTION   : UserExists
+	// DESCRIPTION: Checks if a user exists in the hash table
+	// PARAMETERS : Pointer to the hash table, user's last name
+	// RETURNS    : true if user exists, false otherwise
     __declspec(dllexport) bool UserExists(const char* lastName) {
         int hash = generateUserHash(lastName);
         User* user = searchUserByHash(&ht, hash);
         return user && !user->isDeleted;
     }
 
+	// FUNCTION   : BookExists
+	// DESCRIPTION: Checks if a book exists in the hash table
+	// PARAMETERS : Pointer to the hash table, book title
+	// RETURNS    : true if book exists, false otherwise
     __declspec(dllexport) bool BookExists(const char* title) {
         Book* book = findBookByTitle(title);
         return book && !book->isDeleted;
     }
 
+	// FUNCTION   : UndoLastAction
+	// DESCRIPTION: Undoes the last action taken on the hash table
+	// PARAMETERS : Pointer to the hash table, pointer to the snapshot stack
+	// RETURNS    : none
     __declspec(dllexport) void UndoLastAction() {
         undo_last_action(&ht, undoStack);
     }
 
+	// FUNCTION   : PrintUsers
+	// DESCRIPTION: Prints all users in the hash table
+	// PARAMETERS : Pointer to the hash table
+	// RETURNS    : none
     __declspec(dllexport) void PrintUsers() {
         printUsers(&ht);
     }
 
+	// FUNCTION   : PrintBooks
+	// DESCRIPTION: Prints all books in the hash table
+	// PARAMETERS : Pointer to the hash table
+	// RETURNS    : none
     __declspec(dllexport) void PrintBooks() {
         printBooks(&ht);
     }

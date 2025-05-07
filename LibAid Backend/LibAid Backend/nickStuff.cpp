@@ -1,3 +1,12 @@
+/*
+* FILE		    : dllmain.cpp
+* PROJECT	    : LibAid v3.0.12
+* PROGRAMMER	: Nicholas Reilly
+* FIRST VERSION	: 2025-03-27
+* DESCRIPTION	:
+* REFERENCING   : Deitel, P., & Deitel, H. (2016). How to Program in C and C++ (8th ed.). Deitel & Associates Inc.
+*/
+
 #include "mainHeader.h"
 
 
